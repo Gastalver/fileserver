@@ -1,24 +1,41 @@
+// Modulos de nodejs estrictamente necesarios
 var http = require("http"), fs = require("fs");
 
+// Declaración e instanciación inicial del objeto 'methods', vacío.
 var methods = Object.create(null);
 
-http.createServer(function(request, response) {
-  function respond(code, body, type) {
-    if (!type) type = "text/plain";
-    response.writeHead(code, {"Content-Type": type});
-    if (body && body.pipe)
-      body.pipe(response);
-    else
-      response.end(body);
-  }
-  if (request.method in methods)
-    methods[request.method](urlToPath(request.url),
-                            respond, request);
-  else
-    respond(405, "Method " + request.method +
-            " not allowed.");
+// Creación del servidor que responderá a todas las peticiones HTTP que reciba por el puerto 8000.
+
+http.createServer(function(req, res) {
+
+    // Definición de una función RESPOND, genérica, instrumental, para generar la cabecera y el cuerpo de las respuestas HTTP.
+    function respond(code, body, type) {
+        // Configuración y escritura de la cabecera
+        if (!type) type = "text/plain";
+        res.writeHead(code, {"Content-Type": type});
+        // Envío del body
+        if (body && body.pipe) body.pipe(res);
+        else res.end(body);
+    }
+
+    // Request Handlers
+    // req.method, de express: Contains a string corresponding to the HTTP method of the request: GET, POST, PUT, and so on.
+    // Si existe un método en el objeto methods igual al verbo del objeto request, ejecutalo
+    // pasándole como parámetros la URL
+       if (req.method in methods)
+           //Ejecuta el métOdo, pasándole como parámetro un string con el pathname precedido de un punto, el objeto respond, y el objeto request.
+           methods[req.method](urlToPath(req.url), respond, req);
+       else
+     // Si no existe, usa la función RESPOND con el codigo 405 y un mensaje del error en el body. 
+        respond(405, "Method " + req.method + " not allowed.");
+
 }).listen(8000);
 
+// Función que convierte (parse) el string URL del request en un objeto URL, gracias a un método del módulo URL de nodejs,
+// que coge la parte pathname de la URL (la que va detrás del host y que no comprende el query
+// y la devuelve decodificada y precedida de un punto. 
+// Ejemplo de URI codificada http%3A%2F%2Fw3schools.com%2Fmy%20test.asp%3Fname%3Dst%C3%A5le%26car%3Dsaab
+// Ejemplo de URI decodificada http://w3schools.com/my test.asp?name=ståle&car=saab
 function urlToPath(url) {
   var path = require("url").parse(url).pathname;
   return "." + decodeURIComponent(path);
