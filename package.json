@@ -1,0 +1,15 @@
+{
+  "name": "fileserver",
+  "version": "1.0.0",
+  "description": "Servidor FTP",
+  "main": "file_server.js",
+  "scripts": {
+    "monitoriza": "nodemon file_server.js localhost 8000",
+    "test": "test"
+  },
+  "keywords": [
+    "ftp"
+  ],
+  "author": "",
+  "license": "ISC"
+}
