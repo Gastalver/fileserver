@@ -1,6 +1,7 @@
 // Modulos de nodejs estrictamente necesarios
 var http = require("http"), fs = require("fs");
 
+
 // Declaración e instanciación inicial del objeto 'methods', vacío.
 var methods = Object.create(null);
 
@@ -23,7 +24,7 @@ http.createServer(function(req, res) {
     // Si existe un método en el objeto methods igual al verbo del objeto request, ejecutalo
     // pasándole como parámetros la URL
        if (req.method in methods)
-           //Ejecuta el métOdo, pasándole como parámetro un string con el pathname precedido de un punto, el objeto respond, y el objeto request.
+           //Ejecuta el método, pasándole como parámetro un string con el pathname precedido de un punto, el objeto respond, y el objeto request.
            methods[req.method](urlToPath(req.url), respond, req);
        else
      // Si no existe, usa la función RESPOND con el codigo 405 y un mensaje del error en el body. 
@@ -40,6 +41,10 @@ function urlToPath(url) {
   var path = require("url").parse(url).pathname;
   return "." + decodeURIComponent(path);
 }
+
+// fs.stat(path, callback) devuelve un objeto con todas las propiedades del archivo/directorio indicado en path
+// cfr. https://nodejs.org/api/fs.html#fs_fs_stat_path_callback
+
 
 methods.GET = function(path, respond) {
   fs.stat(path, function(error, stats) {
@@ -82,7 +87,7 @@ function respondErrorOrNothing(respond) {
   };
 }
 
-methods.PUT = function(path, respond, request) {
+methods.PUT = function(path, respond, req) {
   var outStream = fs.createWriteStream(path);
   outStream.on("error", function(error) {
     respond(500, error.toString());
@@ -90,5 +95,5 @@ methods.PUT = function(path, respond, request) {
   outStream.on("finish", function() {
     respond(204);
   });
-  request.pipe(outStream);
+  req.pipe(outStream);
 };
